@@ -1255,10 +1255,12 @@ class Toolbox extends Component<Props, State> {
         overflowMenuContent.splice(
             1, 0, ...this._renderMovedButtons(movedButtons));
 
+        const showDesktopSharingButton = this.state.windowWidth > 475;
+
         return (
             <div className = 'toolbox-content'>
                 <div className = 'button-group-left'>
-                    { buttonsLeft.indexOf('desktop') !== -1
+                    { buttonsLeft.indexOf('desktop') !== -1 && showDesktopSharingButton
                         && this._renderDesktopSharingButton() }
                     { buttonsLeft.indexOf('raisehand') !== -1
                         && <ToolbarButton

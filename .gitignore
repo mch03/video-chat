@@ -77,6 +77,7 @@ android/app/release
 # VSCode files
 android/.project
 android/.settings/org.eclipse.buildship.core.prefs
+.vscode
 
 # Secrets
 android/app/dropbox.key

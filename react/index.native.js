@@ -11,13 +11,15 @@
 import './features/base/lib-jitsi-meet/native/polyfills-bundler';
 
 import React, { PureComponent } from 'react';
-import { AppRegistry } from 'react-native';
+import { AppRegistry, Linking } from 'react-native';
 
 import { App } from './features/app';
 import { IncomingCallApp } from './features/mobile/incoming-call';
 
 // It's crucial that the native loggers are created ASAP, not to lose any data.
 import { _initLogging } from './features/base/logging/functions';
+import { toURLString } from './features/base/util';
+import TwilioApp from './features/twilio';
 
 declare var __DEV__;
 
@@ -40,16 +42,40 @@ type Props = {
  * @extends Component
  */
 class Root extends PureComponent<Props> {
-    /**
-     * Implements React's {@link Component#render()}.
-     *
-     * @inheritdoc
-     * @returns {ReactElement}
-     */
+    constructor() {
+        super();
+        this.state = {
+            twilioDeepLink: '',
+            deepLinkUpdatedTimeStamp: null
+        };
+        Linking.addEventListener('url', this.handleTwilioOpenUrl.bind(this));
+    }
+
+    handleTwilioOpenUrl(url) {
+        console.log(url, '++__urlurl');
+        this.setState({
+            twilioDeepLink: url,
+            deepLinkUpdatedTimeStamp: Date.now()
+        });
+    }
+
+    UNSAFE_componentWillReceiveProps(nextProps: Props) {
+        if (nextProps.url) {
+            this.setState({
+                twilioDeepLink: ''
+            });
+        }
+    }
+
     render() {
+        const { twilioDeepLink, deepLinkUpdatedTimeStamp } = this.state;
+        if (twilioDeepLink) {
+            return <TwilioApp
+                deepLinkUpdatedTimeStamp={deepLinkUpdatedTimeStamp}
+                twilioDeepLink={twilioDeepLink}/>;
+        }
         return (
-            <App
-                { ...this.props } />
+            <App {...this.props} />
         );
     }
 }
@@ -67,7 +93,8 @@ if (!__DEV__) {
 
     AppRegistry.runApplication = (...args) => {
         // $FlowExpectedError
-        console.log = () => {};
+        console.log = () => {
+        };
         __orig_appregistry_runapplication(...args);
         // $FlowExpectedError
         console.log = __orig_console_log;

@@ -9,6 +9,7 @@ target 'Jane Online Appointments' do
   pod 'Crashlytics', '~> 3.14.0'
   pod 'Firebase/Core', '~> 5.18.0'
 #  pod 'Firebase/DynamicLinks', '~> 5.18.0'
+  pod 'react-native-twilio-video-webrtc', path: '../node_modules/react-native-twilio-video-webrtc'
 end
 
 target 'JitsiMeet' do
@@ -66,7 +67,7 @@ target 'JitsiMeet' do
   pod 'RNSound', :path => '../node_modules/react-native-sound'
   pod 'RNSVG', :path => '../node_modules/react-native-svg'
   pod 'RNWatch', :path => '../node_modules/react-native-watch-connectivity'
-
+ pod 'react-native-twilio-video-webrtc', path: '../node_modules/react-native-twilio-video-webrtc'
   # Native pod dependencies
   #
 

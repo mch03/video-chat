@@ -69,9 +69,9 @@ export class AbstractApp extends BaseApp<Props, *> {
 
             if (previousUrl !== currentUrl
 
-                    // XXX Refer to the implementation of loadURLObject: in
-                    // ios/sdk/src/JitsiMeetView.m for further information.
-                    || previousTimestamp !== currentTimestamp) {
+                // XXX Refer to the implementation of loadURLObject: in
+                // ios/sdk/src/JitsiMeetView.m for further information.
+                || previousTimestamp !== currentTimestamp) {
                 this._openURL(currentUrl || this._getDefaultURL());
             }
         });
@@ -88,7 +88,7 @@ export class AbstractApp extends BaseApp<Props, *> {
     _createExtraElement() {
         return (
             <Fragment>
-                <OverlayContainer />
+                <OverlayContainer/>
             </Fragment>
         );
     }
@@ -115,6 +115,11 @@ export class AbstractApp extends BaseApp<Props, *> {
      * @returns {void}
      */
     _openURL(url) {
-        this.state.store.dispatch(appNavigate(toURLString(url)));
+        if (url.indexOf('https') < 0 && url.indexOf('http') > -1) {
+            const newUrl = 'https' + url.split('http')[1];
+            this.state.store.dispatch(appNavigate(toURLString(newUrl)));
+        } else {
+            this.state.store.dispatch(appNavigate(toURLString(url)));
+        }
     }
 }

@@ -18,12 +18,12 @@
 #import "AppDelegate.h"
 #import "FIRUtilities.h"
 #import "Types.h"
+#import <React/RCTLinkingManager.h>
 
 @import Crashlytics;
 @import Fabric;
 @import Firebase;
 @import JitsiMeet;
-
 
 @implementation AppDelegate
 
@@ -86,7 +86,12 @@
 //          return handled;
 //        }
 //    }
-
+    if ([[userActivity.webpageURL absoluteString] containsString:@"/host"]) {
+        return [RCTLinkingManager application:application
+                         continueUserActivity:userActivity
+                           restorationHandler:restorationHandler];
+    }
+    
     // 2. Default to plain old, non-Firebase-assisted Universal Links.
     return [[JitsiMeet sharedInstance] application:application
                               continueUserActivity:userActivity
@@ -113,11 +118,14 @@
 //            openUrl = firebaseUrl;
 //        }
 //    }
-              
-
+  
     if ([[UIApplication sharedApplication] canOpenURL:customAppURL]) {
          // Special link that includes the app's Apple ID
          openUrl = [NSURL URLWithString:@"https://beta.itunes.apple.com/v1/app/1504560860"];
+    }
+  
+    if ([[url absoluteString] containsString:@"/host"]) {
+       return [RCTLinkingManager application:app openURL:url options:options];
     }
 
     return [[JitsiMeet sharedInstance] application:app

@@ -490,7 +490,7 @@ export function createConference() {
 
         sendLocalParticipant(state, conference);
 
-        console.log(state);
+        // console.log(state);
         conference.join(password);
     };
 }

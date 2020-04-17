@@ -7,9 +7,9 @@ import {
     View,
     Alert
 } from 'react-native';
-import { RemoteView } from './RemoteView';
+import { FullScreenView } from './FullScreenView';
 import { ToolBox } from './ToolBox';
-import { LocalView } from './LocalView';
+import { BottomView } from './BottomView';
 
 export default class TwilioMain extends Component {
     constructor(props) {
@@ -17,10 +17,12 @@ export default class TwilioMain extends Component {
         this.state = {
             isAudioEnabled: true,
             isVideoEnabled: true,
-            participants: new Map(),
+            participants: [],
             videoTracks: new Map(),
             roomName: props.token.room_name,
-            token: props.token.token
+            token: props.token.token,
+            showToolBox: true,
+            fullScreenSessionId: 'self'
         };
     }
 
@@ -28,12 +30,15 @@ export default class TwilioMain extends Component {
         this.refs.twilioVideo.connect({
             roomName: this.state.roomName,
             accessToken: this.state.token
+        }, () => {
+            console.log(this.state.videoTracks);
         });
     }
 
     onEndButtonPress = () => {
         try {
             this.refs.twilioVideo.disconnect();
+
         } catch (error) {
             Alert.alert(error);
         } finally {
@@ -55,8 +60,12 @@ export default class TwilioMain extends Component {
         this.refs.twilioVideo.flipCamera();
     };
 
-    onRoomDidConnect = () => {
+    onRoomDidConnect = ({ roomName, participants }) => {
+        // console.log(participants, '++___participants');
         this.props.onRoomDidConnect();
+        this.setState({
+            participants: [ ...this.state.participants, ...participants ]
+        });
     };
 
     onRoomDidDisconnect = ({ roomName, error }) => {
@@ -70,7 +79,7 @@ export default class TwilioMain extends Component {
     };
 
     onParticipantAddedVideoTrack = ({ participant, track }) => {
-        console.log('onParticipantAddedVideoTrack: ', participant, track);
+        // console.log(track.trackSid, track, '++____track.trackSid');
         this.setState({
             videoTracks: new Map([
                 ...this.state.videoTracks,
@@ -78,7 +87,9 @@ export default class TwilioMain extends Component {
                     participantSid: participant.sid,
                     videoTrackSid: track.trackSid
                 } ]
-            ])
+            ]),
+            participants: [ ...this.state.participants, participant ],
+            fullScreenSessionId: track.trackSid
         });
     };
 
@@ -89,19 +100,45 @@ export default class TwilioMain extends Component {
         this.setState({ videoTracks: new Map([ ...videoTracks ]) });
     };
 
+    onFullScreenViewPress = () => {
+        const { showToolBox } = this.state;
+        this.setState({
+            showToolBox: !showToolBox
+        });
+    };
+
+    onBottomViewCellPress = (SessionId) => {
+        this.setState({
+            fullScreenSessionId: SessionId
+        });
+    };
+
     render() {
+        const { videoTracks, isVideoEnabled, isAudioEnabled, token, participants, showToolBox, fullScreenSessionId } = this.state;
         return (
             <View style={styles.container}>
                 {
                     <View style={styles.callContainer}>
-                        <RemoteView videoTracks={this.state.videoTracks}/>
-                        <LocalView isVideoEnabled={this.state.isVideoEnabled}/>
-                        <ToolBox onEndButtonPress={this.onEndButtonPress}
-                                 onMuteButtonPress={this.onMuteButtonPress}
-                                 onFlipButtonPress={this.onFlipButtonPress}
-                                 onVideoMuteButtonPress={this.onVideoMuteButtonPress}
-                                 isAudioEnabled={this.state.isAudioEnabled}
-                                 isVideoEnabled={this.state.isVideoEnabled}/>
+                        <FullScreenView videoTracks={videoTracks}
+                                        jwtToken={token}
+                                        participants={participants}
+                                        fullScreenSessionId={fullScreenSessionId}
+                                        onPress={this.onFullScreenViewPress}
+                        />
+                        <BottomView isVideoEnabled={isVideoEnabled}
+                                    jwtToken={token}
+                                    videoTracks={videoTracks}
+                                    participants={participants}
+                                    onBottomViewCellPress={this.onBottomViewCellPress}/>
+                        {
+                            showToolBox &&
+                            <ToolBox onEndButtonPress={this.onEndButtonPress}
+                                     onMuteButtonPress={this.onMuteButtonPress}
+                                     onFlipButtonPress={this.onFlipButtonPress}
+                                     onVideoMuteButtonPress={this.onVideoMuteButtonPress}
+                                     isAudioEnabled={isAudioEnabled}
+                                     isVideoEnabled={isVideoEnabled}/>
+                        }
                     </View>
                 }
                 <TwilioVideo

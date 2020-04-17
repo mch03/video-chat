@@ -86,7 +86,7 @@
 //          return handled;
 //        }
 //    }
-    if ([[userActivity.webpageURL absoluteString] containsString:@"/host"]) {
+    if ([[userActivity.webpageURL absoluteString] containsString:@"twilio"]) {
         return [RCTLinkingManager application:application
                          continueUserActivity:userActivity
                            restorationHandler:restorationHandler];
@@ -124,7 +124,7 @@
          openUrl = [NSURL URLWithString:@"https://beta.itunes.apple.com/v1/app/1504560860"];
     }
   
-    if ([[url absoluteString] containsString:@"/host"]) {
+    if ([[url absoluteString] containsString:@"twilio"]) {
        return [RCTLinkingManager application:app openURL:url options:options];
     }
 

@@ -37,15 +37,15 @@ export default class TwilioApp extends Component {
                     token: res,
                     status: 'connected'
                 });
-            }, 1000);
-        } catch (e) {
+            }, 500);
+        } catch (error) {
             setTimeout(() => {
                 this.setState({
                     status: 'disconnected'
                 }, () => {
-                    // Alert.alert('Something wrong.');
+                    // Alert.alert(JSON.stringify(error));
                 });
-            }, 1000);
+            }, 500);
         }
     }
 

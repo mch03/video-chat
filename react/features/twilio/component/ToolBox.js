@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     optionsContainer: {
         position: 'absolute',
         left: 0,
-        bottom: '8%',
+        bottom: 150,
         right: 0,
         height: 100,
         width: '100%',

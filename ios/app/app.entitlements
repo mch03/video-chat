@@ -10,6 +10,7 @@
 		<string>applinks:videochat-ca.janeapp.com</string>
 		<string>applinks:videochat.janeapp.com.au</string>
 		<string>applinks:videochat.janeapp.co.uk</string>
+		<string>applinks:video-twilio.jane.qa</string>
 	</array>
 	<key>com.apple.developer.siri</key>
 	<true/>

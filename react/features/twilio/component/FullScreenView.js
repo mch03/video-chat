@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     },
     remoteVideo: {
         flex: 1,
-        backgroundColor: 'red'
+        backgroundColor: '#303030'
     },
     participantHeaderContainer: {
         width: '100%',

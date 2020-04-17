@@ -1,9 +1,7 @@
 import {
     StyleSheet,
-    Text,
     TouchableOpacity,
     View,
-    Animated
 } from 'react-native';
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';

@@ -61,7 +61,6 @@ export default class TwilioMain extends Component {
     };
 
     onRoomDidConnect = ({ roomName, participants }) => {
-        // console.log(participants, '++___participants');
         this.props.onRoomDidConnect();
         this.setState({
             participants: [ ...this.state.participants, ...participants ]
@@ -79,7 +78,6 @@ export default class TwilioMain extends Component {
     };
 
     onParticipantAddedVideoTrack = ({ participant, track }) => {
-        // console.log(track.trackSid, track, '++____track.trackSid');
         this.setState({
             videoTracks: new Map([
                 ...this.state.videoTracks,

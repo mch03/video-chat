@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import {
     StyleSheet,
     View,
-    Alert,
     ActivityIndicator
 } from 'react-native';
 import TwilioMain from './component/TwilioMain';

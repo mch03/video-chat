@@ -4,7 +4,7 @@ import {
     TwilioVideoParticipantView
 } from 'react-native-twilio-video-webrtc';
 import React from 'react';
-import { getCurrentUserInfo } from '../function';
+import { getCurrentUserInfo } from '../util';
 
 export const FullScreenView = ({ videoTracks, participants, onPress, fullScreenSessionId, jwtToken }) => {
     return <TouchableWithoutFeedback onPress={onPress}>
@@ -27,10 +27,10 @@ export const FullScreenView = ({ videoTracks, participants, onPress, fullScreenS
             }
             {
                 fullScreenSessionId !== 'self' && Array.from(videoTracks, ([ trackSid, trackIdentifier ]) => {
-                    const participantName = participants.filter(v => {
-                        return v.sid === trackIdentifier.participantSid;
-                    })[0].identity;
                     if (fullScreenSessionId === trackSid) {
+                        const participantName = participants.filter(v => {
+                            return v.sid === trackIdentifier.participantSid;
+                        })[0].identity;
                         return (
                             <View style={styles.fullScreenContainer}>
                                 <TwilioVideoParticipantView

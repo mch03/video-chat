@@ -2,16 +2,21 @@ import React, { Component } from 'react';
 import {
     StyleSheet,
     View,
-    ActivityIndicator
+    ActivityIndicator, Linking
 } from 'react-native';
 import TwilioMain from './component/TwilioMain';
 import { WelcomePage } from './component/WelcomePage';
-import { getTokenFromJane } from './function';
+import {
+    getInfoFromDeepLinkJwt,
+    _getJwtFromDeepLink
+} from './util';
+import { sendBeaconRn, getTokenFromJane } from './service';
 
 export default class TwilioApp extends Component {
     state = {
         token: null,
-        status: 'connecting'
+        status: 'connecting',
+        startedAt: null
     };
 
     componentDidMount() {
@@ -34,7 +39,7 @@ export default class TwilioApp extends Component {
             setTimeout(() => {
                 this.setState({
                     token: res,
-                    status: 'connected'
+                    status: 'hasToken'
                 });
             }, 500);
         } catch (error) {
@@ -48,12 +53,35 @@ export default class TwilioApp extends Component {
         }
     }
 
-    disconnect = () => {
-        this.setState({ status: 'disconnected' });
+    disconnect = async () => {
+        try {
+            const { twilioDeepLink } = this.props;
+            const { startedAt } = this.state;
+            const leaveUrl = `https:${getInfoFromDeepLinkJwt(twilioDeepLink, 'leave_url')}`;
+            const surveyUrl = `https:${getInfoFromDeepLinkJwt(twilioDeepLink, 'survey_url')}`;
+            const jwt = _getJwtFromDeepLink(twilioDeepLink.url);
+            this.setState({ status: 'disconnected' }, async () => {
+                if (jwt) {
+                    const obj = {
+                        jwt,
+                        started_at: startedAt
+                    };
+                    const data = new Blob([ JSON.stringify(obj, null, 2) ], { type: 'text/plain; charset=UTF-8' });
+                    if (leaveUrl && surveyUrl) {
+                        await Linking.openURL(surveyUrl);
+                        startedAt && await sendBeaconRn(leaveUrl, data);
+                    }
+                }
+            });
+        } catch (error) {
+            console.log(error);
+        }
     };
 
-    connect = () => {
-        this.setState({ status: 'connected' });
+    getStartedAtTime = (startedAt) => {
+        this.setState({
+            startedAt
+        });
     };
 
     render() {
@@ -68,10 +96,10 @@ export default class TwilioApp extends Component {
                     <WelcomePage/>
                 }
                 {
-                    this.state.status === 'connected' &&
+                    this.state.status === 'hasToken' &&
                     <TwilioMain token={this.state.token}
                                 onRoomDidDisconnect={this.disconnect}
-                                onRoomDidConnect={this.connect}/>
+                                getStartedAtTime={this.getStartedAtTime}/>
                 }
             </View>
         );

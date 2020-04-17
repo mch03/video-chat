@@ -1,4 +1,14 @@
-import jwtDecode from 'jwt-decode';
+import { _getJwtFromDeepLink, _getJwtHost } from './util';
+
+export function sendBeaconRn(url, data) {
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'text/plain; charset=UTF-8'
+        },
+        body: data
+    });
+}
 
 export function getTokenWithJwt(jwt, jwtHost) {
     const headers = new Headers({
@@ -25,18 +35,4 @@ export async function getTokenFromJane(deepLink) {
     const jwt = _getJwtFromDeepLink(url);
     const jwtHost = _getJwtHost(url);
     return await getTokenWithJwt(jwt, jwtHost);
-}
-
-function _getJwtFromDeepLink(url) {
-    return url.split('/jwt/')[1].split('/')[0];
-}
-
-function _getJwtHost(url) {
-    const deepLinkParamsArr = url.split('/');
-    return deepLinkParamsArr[deepLinkParamsArr.length - 1];
-}
-
-export function getCurrentUserInfo(jwt) {
-    const jwtPayload = jwtDecode(jwt);
-    return jwtPayload && jwtPayload.grants
 }

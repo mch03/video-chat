@@ -4,7 +4,7 @@ import {
 } from 'react-native-twilio-video-webrtc';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
-import { getCurrentUserInfo } from '../function';
+import { getCurrentUserInfo } from '../util';
 
 export const BottomView = ({ isVideoEnabled, jwtToken, videoTracks, participants, onBottomViewCellPress }) => {
     return <View style={styles.bottomVideoContainer}>

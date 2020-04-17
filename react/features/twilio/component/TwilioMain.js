@@ -30,15 +30,12 @@ export default class TwilioMain extends Component {
         this.refs.twilioVideo.connect({
             roomName: this.state.roomName,
             accessToken: this.state.token
-        }, () => {
-            console.log(this.state.videoTracks);
         });
     }
 
-    onEndButtonPress = () => {
+    onEndButtonPress = async () => {
         try {
             this.refs.twilioVideo.disconnect();
-
         } catch (error) {
             Alert.alert(error);
         } finally {
@@ -61,14 +58,13 @@ export default class TwilioMain extends Component {
     };
 
     onRoomDidConnect = ({ roomName, participants }) => {
-        this.props.onRoomDidConnect();
         this.setState({
             participants: [ ...this.state.participants, ...participants ]
         });
     };
 
     onRoomDidDisconnect = ({ roomName, error }) => {
-        Alert.alert(error);
+        // Alert.alert(error);
         this.props.onRoomDidDisconnect();
     };
 
@@ -88,6 +84,8 @@ export default class TwilioMain extends Component {
             ]),
             participants: [ ...this.state.participants, participant ],
             fullScreenSessionId: track.trackSid
+        }, () => {
+            this.props.getStartedAtTime(new Date());
         });
     };
 

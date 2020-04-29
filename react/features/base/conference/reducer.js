@@ -25,7 +25,7 @@ import {
     SET_ROOM,
     SET_SIP_GATEWAY_ENABLED,
     SET_START_MUTED_POLICY,
-    CONFERENCE_STARTED_TIME_CHANGED
+    SET_CONFERENCE_START_TIME
 } from './actionTypes';
 import { VIDEO_QUALITY_LEVELS } from './constants';
 import { isRoomValid } from './functions';
@@ -121,7 +121,7 @@ ReducerRegistry.register(
                 startVideoMutedPolicy: action.startVideoMutedPolicy
             };
 
-        case CONFERENCE_STARTED_TIME_CHANGED:
+        case SET_CONFERENCE_START_TIME:
             return set(state, 'conferenceStartedTime', action.conferenceStartedTime);
         }
 

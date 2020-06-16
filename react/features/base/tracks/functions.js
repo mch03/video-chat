@@ -95,10 +95,6 @@ export function createLocalTracksF(options = {}, firePermissionPromptIsShownEven
     } = state['features/base/config'];
     let constraints = options.constraints ?? state['features/base/config'].constraints;
 
-    if (JitsiMeetJS.util.browser.isFirefox()) {
-        constraints = null;
-    }
-
     return (
         loadEffects(store).then(effectsArray => {
             // Filter any undefined values returned by Promise.resolve().

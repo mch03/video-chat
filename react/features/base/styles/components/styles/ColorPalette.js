@@ -3,6 +3,7 @@
  */
 const BLACK = '#111111';
 
+const JANE_DARK_COLOR = '#009097';
 /**
  * The application's color palette.
  */
@@ -44,4 +45,5 @@ export const ColorPalette = {
 
     /** Jane */
     jane: '#00c1ca',
+    janeDarkColor: JANE_DARK_COLOR
 };

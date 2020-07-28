@@ -203,6 +203,27 @@ const SECTION_LIST_STYLES = {
     }
 };
 
+const WATING_MESSAGE_STYLES = {
+    waitingMessageContainer: {
+        position: 'absolute',
+        top: 80,
+        width: '100%'
+    },
+
+    waitingMessageHeader: {
+        fontSize: 18,
+        color: ColorPalette.janeDarkColor,
+        textAlign: 'center'
+    },
+
+    waitingMessageText: {
+        marginTop: 5,
+        fontSize: 14,
+        color: ColorPalette.janeDarkColor,
+        textAlign: 'center'
+    }
+};
+
 export const TINTED_VIEW_DEFAULT = {
     backgroundColor: ColorPalette.appBackground,
     opacity: 0.8
@@ -214,5 +235,6 @@ export const TINTED_VIEW_DEFAULT = {
  */
 export default {
     ...PAGED_LIST_STYLES,
-    ...SECTION_LIST_STYLES
+    ...SECTION_LIST_STYLES,
+    ...WATING_MESSAGE_STYLES
 };

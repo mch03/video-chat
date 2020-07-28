@@ -8,7 +8,9 @@ import { connect } from '../../base/redux';
 import { DimensionsDetector } from '../../base/responsive-ui';
 import { StyleType } from '../../base/styles';
 
+import WaitingMessage from '../../base/react/components/native/WaitingMessage.js'
 import { AVATAR_SIZE } from './styles';
+import { Text, View } from 'react-native';
 
 /**
  * The type of the React {@link Component} props of {@link LargeVideo}.
@@ -137,6 +139,7 @@ class LargeVideo extends Component<Props, State> {
                     useConnectivityInfoLabel = { useConnectivityInfoLabel }
                     zOrder = { 0 }
                     zoomEnabled = { true } />
+                <WaitingMessage/>
             </DimensionsDetector>
         );
     }

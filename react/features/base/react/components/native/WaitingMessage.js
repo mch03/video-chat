@@ -1,13 +1,14 @@
 // @flow
 /* eslint-disable */
 import React, { Component } from 'react/index';
-import { Animated, Easing, Text, SafeAreaView } from 'react-native';
+import { Animated, Easing, Text, SafeAreaView, Image } from 'react-native';
 import styles from './styles';
 import { getLocalizedDateFormatter, translate } from '../../../i18n';
 import { connect } from '../../../redux';
 import { getParticipantCount } from '../../../participants';
 import { getRemoteTracks } from '../../../tracks';
 import jwtDecode from 'jwt-decode';
+import View from 'react-native-webrtc/RTCView';
 
 type Props = {
     _isGuest: boolean,
@@ -113,12 +114,13 @@ class WaitingMessage extends Component<Props, State> {
     _renderWaitingMessage() {
         const { beforeAppointmentStart, appointmentStartAt } = this.state;
         const animate = this.animatedValue.interpolate({
-            inputRange: [0, .2, .5, .8, 1],
-            outputRange: [.5, .8, 1, 1, .5]
+            inputRange: [0, .5, 1],
+            outputRange: [.1, 1, .1]
         });
-        
-        let header = <Text style={styles.waitingMessageHeader}>Waiting for the other participant to join...</Text>;
 
+        let header = <Text style={styles.waitingMessageHeader}>Waiting for the other participant to join...</Text>;
+        const image = <Image style={styles.watermark}
+                             source={require('../../../../../../images/watermark.png')}/>;
         if (beforeAppointmentStart && appointmentStartAt) {
             header = (<Text style={styles.waitingMessageHeader}>Your appointment will begin
                 at {getLocalizedDateFormatter(appointmentStartAt).format('hh:mm A')}</Text>);
@@ -128,9 +130,14 @@ class WaitingMessage extends Component<Props, State> {
             opacity: animate
         }]}>
             {
-                header
+                image
             }
-            <Text style={styles.waitingMessageText}>Sit back, relax and take a moment for yourself.</Text>
+            <View style={{backgroundColor:'transparent'}}>
+                {
+                    header
+                }
+                <Text style={styles.waitingMessageText}>Sit back, relax and take a moment for yourself.</Text>
+            </View>
         </Animated.View>);
     }
 }

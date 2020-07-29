@@ -207,20 +207,28 @@ const WATING_MESSAGE_STYLES = {
     waitingMessageContainer: {
         position: 'absolute',
         top: 80,
-        width: '100%'
+        width: '100%',
+        flexDirection: 'row'
     },
 
     waitingMessageHeader: {
-        fontSize: 18,
+        fontSize: 15,
         color: ColorPalette.janeDarkColor,
-        textAlign: 'center'
+        textAlign: 'left'
     },
 
     waitingMessageText: {
         marginTop: 5,
-        fontSize: 14,
+        fontSize: 12,
         color: ColorPalette.janeDarkColor,
-        textAlign: 'center'
+        textAlign: 'left'
+    },
+
+    watermark: {
+        width: 60,
+        height: 50,
+        marginLeft: 16,
+        marginRight: 8
     }
 };
 

@@ -213,15 +213,18 @@ const WATING_MESSAGE_STYLES = {
 
     waitingMessageHeader: {
         fontSize: 15,
+        marginTop: 5,
         color: ColorPalette.janeDarkColor,
-        textAlign: 'left'
+        textAlign: 'left',
+        backgroundColor: 'transparent'
     },
 
     waitingMessageText: {
         marginTop: 5,
         fontSize: 12,
         color: ColorPalette.janeDarkColor,
-        textAlign: 'left'
+        textAlign: 'left',
+        backgroundColor: 'transparent'
     },
 
     watermark: {

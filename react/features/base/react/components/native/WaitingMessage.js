@@ -9,6 +9,9 @@ import { getParticipantCount } from '../../../participants';
 import { getRemoteTracks } from '../../../tracks';
 import jwtDecode from 'jwt-decode';
 import View from 'react-native-webrtc/RTCView';
+import moment from 'moment';
+
+const watermarkImg = require('../../../../../../images/watermark.png')
 
 type Props = {
     _isGuest: boolean,
@@ -57,16 +60,15 @@ class WaitingMessage extends Component<Props, State> {
     _startTimer() {
         const { jwt, conferenceHasStarted } = this.props;
         const jwtPayload = jwt && jwtDecode(jwt);
-
         if (jwtPayload && jwtPayload.context && !conferenceHasStarted) {
             const { start_at } = jwtPayload.context || 0;
-            const appointmentStartTimeStamp = new Date(start_at).getTime();
+            // const appointmentStartTimeStamp = new Date(start_at).getTime();
+            const appointmentStartTimeStamp = moment(moment(start_at, 'YYYY-MM-DD HH:mm:ss')).valueOf()
             const now = new Date().getTime();
-
             if (now < appointmentStartTimeStamp) {
                 this.setState({
                     beforeAppointmentStart: true,
-                    appointmentStartAt: start_at
+                    appointmentStartAt: start_at,
                 }, () => {
                     this._setInterval(appointmentStartTimeStamp);
                 });
@@ -120,10 +122,11 @@ class WaitingMessage extends Component<Props, State> {
 
         let header = <Text style={styles.waitingMessageHeader}>Waiting for the other participant to join...</Text>;
         const image = <Image style={styles.watermark}
-                             source={require('../../../../../../images/watermark.png')}/>;
+                             source={watermarkImg}/>;
         if (beforeAppointmentStart && appointmentStartAt) {
+            const time = moment(appointmentStartAt, "YYYY-MM-DD HH:mm").format("YYYY-MM-DD HH:mm");
             header = (<Text style={styles.waitingMessageHeader}>Your appointment will begin
-                at {getLocalizedDateFormatter(appointmentStartAt).format('hh:mm A')}</Text>);
+                at {getLocalizedDateFormatter(time).format('hh:mm A')}</Text>);
         }
 
         return (<Animated.View className = 'waitingMessage' style={[styles.waitingMessageContainer,{

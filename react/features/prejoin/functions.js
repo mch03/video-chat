@@ -1,7 +1,7 @@
 // @flow
 
-import { getRoomName } from '../base/conference';
-import { getDialOutStatusUrl, getDialOutUrl } from '../base/config/functions';
+import {getRoomName} from '../base/conference';
+import {getDialOutStatusUrl, getDialOutUrl} from '../base/config/functions';
 
 /**
  * Mutes or unmutes a track.
@@ -259,8 +259,9 @@ export function isJoinByPhoneDialogVisible(state: Object): boolean {
  * @returns {boolean}
  */
 export function isPrejoinPageEnabled(state: Object): boolean {
-    return state['features/base/config'].prejoinPageEnabled
-        && !state['features/base/settings'].userSelectedSkipPrejoin;
+    // return state['features/base/config'].prejoinPageEnabled
+    //     && !state['features/base/settings'].userSelectedSkipPrejoin;
+    return state['features/base/config'].prejoinPageEnabled || state['features/base/jwt'].jwt
 }
 
 /**
@@ -271,4 +272,13 @@ export function isPrejoinPageEnabled(state: Object): boolean {
  */
 export function isPrejoinPageVisible(state: Object): boolean {
     return isPrejoinPageEnabled(state) && state['features/prejoin']?.showPrejoin;
+}
+
+export async function checkOtherParticipantsReady(jwt, jwtPayload) {
+    const url = new URL(jwtPayload.context.check_ready_status_url);
+
+    const params = {jwt: jwt};
+    url.search = new URLSearchParams(params).toString();
+
+    return fetch(url).then(response => response.json()).then(res => res.other_participants_ready);
 }

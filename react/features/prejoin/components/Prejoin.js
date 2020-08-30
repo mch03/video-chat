@@ -1,6 +1,6 @@
 // @flow
 
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import InlineDialog from '@atlaskit/inline-dialog';
 import {
     joinConference as joinConferenceAction,
@@ -8,25 +8,30 @@ import {
     setSkipPrejoin as setSkipPrejoinAction,
     setJoinByPhoneDialogVisiblity as setJoinByPhoneDialogVisiblityAction
 } from '../actions';
-import { getRoomName } from '../../base/conference';
-import { Icon, IconPhone, IconVolumeOff } from '../../base/icons';
-import { translate } from '../../base/i18n';
-import { connect } from '../../base/redux';
-import { getDisplayName, updateSettings } from '../../base/settings';
+import {getRoomName} from '../../base/conference';
+import {Icon, IconPhone, IconVolumeOff} from '../../base/icons';
+import {getLocalizedDateFormatter, translate} from '../../base/i18n';
+import {connect} from '../../base/redux';
+import {getPreJoinPageDisplayName, updateSettings} from '../../base/settings';
 import ActionButton from './buttons/ActionButton';
 import {
     isJoinByPhoneButtonVisible,
     isDeviceStatusVisible,
-    isJoinByPhoneDialogVisible
+    isJoinByPhoneDialogVisible,
+    checkOtherParticipantsReady
 } from '../functions';
-import { isGuest } from '../../invite';
+import {isGuest} from '../../invite';
 import CopyMeetingUrl from './preview/CopyMeetingUrl';
 import DeviceStatus from './preview/DeviceStatus';
 import ParticipantName from './preview/ParticipantName';
 import Preview from './preview/Preview';
-import { VideoSettingsButton, AudioSettingsButton } from '../../toolbox';
-import JoinByPhoneDialog from './dialogs/JoinByPhoneDialog';
-
+import {VideoSettingsButton, AudioSettingsButton} from '../../toolbox';
+import {Sockets} from '../../../../service/Websocket/socket';
+import {parseJWTFromURLParams} from '../../base/jwt';
+import jwtDecode from 'jwt-decode';
+import messageHandler from '../../../../modules/UI/util/MessageHandler';
+import moment from 'moment';
+import {Watermarks} from '../../base/react/components/web';
 
 type Props = {
 
@@ -112,15 +117,21 @@ class Prejoin extends Component<Props, State> {
         super(props);
 
         this.state = {
-            showJoinByPhoneButtons: false
+            showJoinByPhoneButtons: false,
+            localParticipantCanJoin: false
         };
-
+        this.socket = null;
         this._closeDialog = this._closeDialog.bind(this);
         this._showDialog = this._showDialog.bind(this);
         this._onCheckboxChange = this._onCheckboxChange.bind(this);
         this._onDropdownClose = this._onDropdownClose.bind(this);
         this._onOptionsClick = this._onOptionsClick.bind(this);
         this._setName = this._setName.bind(this);
+        this._joinConference = this._joinConference.bind(this);
+        this._joinConferenceWithoutAudio = this._joinConferenceWithoutAudio.bind(this);
+        this._onReadyBtnClick = this._onReadyBtnClick.bind(this);
+        this._onMessageUpdate = this._onMessageUpdate.bind(this);
+        this._closeWindow = this._closeWindow.bind(this);
     }
 
     _onCheckboxChange: () => void;
@@ -201,6 +212,183 @@ class Prejoin extends Component<Props, State> {
         this._onDropdownClose();
     }
 
+    componentDidMount() {
+        const {participantType} = this.props;
+        if (participantType === 'Patient') {
+            this._sendBeacon();
+        }
+        this._connectSocket();
+    }
+
+    componentWillUnmount() {
+        this.socket && this.socket.disconnect();
+    }
+
+    _onMessageUpdate(event) {
+        const {participantType} = this.props;
+        if (event.info === 'practitioner_ready' && participantType === 'Patient') {
+            this.setState({
+                localParticipantCanJoin: true
+            });
+        }
+        if (event.info === 'patient_ready' && participantType === 'StaffMember') {
+            this.setState({
+                localParticipantCanJoin: true
+            });
+        }
+    }
+
+    _joinConference() {
+        const {
+            joinConference
+        } = this.props;
+        const {participantType} = this.props;
+        if (participantType === 'StaffMember') {
+            this._sendBeacon();
+        }
+        joinConference();
+    }
+
+    async _connectSocket() {
+        const {jwt, jwtPayload} = this.props;
+        const socketJwtPayload = jwtDecode(jwtPayload.context.ws_token);
+        try {
+            const otherParticipantsReady = await checkOtherParticipantsReady(jwt, jwtPayload);
+            if (otherParticipantsReady) {
+                this.setState({
+                    localParticipantCanJoin: true
+                });
+            } else {
+                if (socketJwtPayload) {
+                    this.socket = new Sockets({
+                        socket_host: jwtPayload.context.ws_host,
+                        ws_token: jwtPayload.context.ws_token
+                    });
+                    this.socket.onMessageUpdateListener = this._onMessageUpdate.bind(this);
+                }
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    _sendBeacon() {
+        const {jwt, jwtPayload, participantType, participant} = this.props;
+        if (jwt && jwtPayload) {
+            const wsUpdateUrl = jwtPayload.context.participant_ready_url;
+            const obj = {
+                jwt,
+                // eslint-disable-next-line camelcase
+                info: participantType === 'StaffMember' ? 'practitioner_ready' : 'patient_ready',
+                participant_type: participantType === 'StaffMember' ? 'staff_member' : 'patient',
+                participant_id: participant.participant_id,
+                participant_name: participant.name,
+                room_name: jwtPayload.room
+            };
+            const data = new Blob([JSON.stringify(obj, null, 2)], {type: 'text/plain; charset=UTF-8'});
+            // eslint-disable-next-line no-mixed-operators
+            navigator.sendBeacon(wsUpdateUrl, data);
+        }
+    }
+
+    _onReadyBtnClick() {
+        this._sendBeacon();
+    }
+
+    _joinConferenceWithoutAudio() {
+        const {
+            joinConferenceWithoutAudio
+        } = this.props;
+        this._sendBeacon();
+        joinConferenceWithoutAudio();
+    }
+
+    _getDialogTitleMsg() {
+        const {t, participantType} = this.props;
+        const {localParticipantCanJoin} = this.state;
+        let title;
+        if (!localParticipantCanJoin) {
+            title = 'Test your audio and video while you wait.';
+        } else {
+            if (participantType === 'StaffMember') {
+                title = 'When you are ready to begin, click on button below to admit your client into the video session.';
+            } else {
+                title = '';
+            }
+        }
+        return <div className='prejoin-info-title-msg'>{title}</div>;
+    }
+
+    _getDialogTitle() {
+        const {t, participantType} = this.props;
+        const {localParticipantCanJoin} = this.state;
+        let header;
+        if (participantType === 'StaffMember') {
+            if (!localParticipantCanJoin) {
+                header = t('prejoin.pratitionerWaitMsg');
+            }
+            header = t('prejoin.patientReady');
+        } else {
+            if (!localParticipantCanJoin) {
+                header = t('prejoin.patientWaitMsg');
+            }
+            header = t('prejoin.pratitionerReady');
+        }
+        return <div className='prejoin-info-title'>{header}</div>;
+    }
+
+    _getStartDate() {
+        const {jwtPayload} = this.props;
+        const startAt = jwtPayload && jwtPayload.context && jwtPayload.context.start_at || '';
+        if (startAt) {
+            return <p>
+                {
+                    getLocalizedDateFormatter(startAt).format('MMMM D, YYYY')
+                }
+            </p>;
+        }
+        return null;
+    }
+
+    _getStartTimeAndEndTime() {
+        const {jwtPayload} = this.props;
+        const startAt = jwtPayload && jwtPayload.context && jwtPayload.context.start_at || '';
+        const endAt = jwtPayload && jwtPayload.context && jwtPayload.context.end_at || '';
+        if (!startAt || !endAt) {
+            return null;
+        }
+        return <p>
+            {
+                `${getLocalizedDateFormatter(startAt).format('h:mm')} -
+            ${getLocalizedDateFormatter(endAt).format('h:mm A')}`
+            }
+        </p>;
+    }
+
+    _getDuration() {
+        const {jwtPayload} = this.props;
+        const startAt = jwtPayload && jwtPayload.context && jwtPayload.context.start_at || '';
+        const endAt = jwtPayload && jwtPayload.context && jwtPayload.context.end_at || '';
+        if (!startAt || !endAt) {
+            return null;
+        }
+        const duration = getLocalizedDateFormatter(endAt).valueOf() - getLocalizedDateFormatter(startAt).valueOf();
+        return <p>
+            {
+                `${moment.duration(duration).asMinutes()} Minutes`
+            }
+        </p>;
+    }
+
+    _closeWindow() {
+        window.close();
+    }
+
+    _getBtnText() {
+        const {participantType} = this.props;
+        return participantType === 'StaffMember' ? 'Admin Client' : 'Begin';
+    }
+
     /**
      * Implements React's {@link Component#render()}.
      *
@@ -209,111 +397,112 @@ class Prejoin extends Component<Props, State> {
      */
     render() {
         const {
-            deviceStatusVisible,
-            hasJoinByPhoneButton,
-            isAnonymousUser,
-            joinConference,
-            joinConferenceWithoutAudio,
             name,
-            showDialog,
+            participantType,
+            deviceStatusVisible,
+            jwtPayload,
             t
         } = this.props;
 
-        const { _closeDialog, _onCheckboxChange, _onDropdownClose, _onOptionsClick, _setName, _showDialog } = this;
-        const { showJoinByPhoneButtons } = this.state;
-
+        const {_onCheckboxChange, _joinConference, _closeWindow} = this;
+        const {localParticipantCanJoin} = this.state;
+        const stopAnimation = participantType === 'StaffMember';
+        const waitingMessageHeader = participantType === 'StaffMember' ? '' : 'Waiting for the practitioner...';
         return (
-            <div className = 'prejoin-full-page'>
-                <Preview name = { name } />
-                <div className = 'prejoin-input-area-container'>
-                    <div className = 'prejoin-input-area'>
-                        <div className = 'prejoin-title'>
-                            {t('prejoin.joinMeeting')}
+            <div className='prejoin-full-page'>
+                <Watermarks
+                    stopAnimation={stopAnimation || localParticipantCanJoin}
+                    waitingMessageHeader={waitingMessageHeader}/>
+                <Preview name={name}/>
+                <div className='prejoin-info-area-container'>
+                    <div className='prejoin-info-area'>
+                        <div className='prejoin-info'>
+                            <div className='prejoin-info-logo-wrapper'>
+                                <div className='prejoin-info-logo'>
+                                </div>
+                            </div>
+                            <div className='prejoin-info-text-wrapper'>
+                                {
+                                    this._getDialogTitle()
+                                }
+                                {
+                                    this._getDialogTitleMsg()
+                                }
+                                <div className='prejoin-info-detail'>
+                                    <p>
+                                        {
+                                            jwtPayload && jwtPayload.context && jwtPayload.context.treatment
+                                        }
+                                    </p>
+                                    <p>
+                                        {
+                                            jwtPayload && jwtPayload.context && jwtPayload.context.practitioner_name
+                                        }
+                                    </p>
+                                    {
+                                        this._getStartDate()
+                                    }
+                                    {
+                                        this._getStartTimeAndEndTime()
+                                    }
+                                    {
+                                        this._getDuration()
+                                    }
+                                </div>
+                            </div>
                         </div>
-
-                        <CopyMeetingUrl />
-
-                        <ParticipantName
-                            isEditable = { isAnonymousUser }
-                            joinConference = { joinConference }
-                            setName = { _setName }
-                            value = { name } />
-
-                        <div className = 'prejoin-preview-dropdown-container'>
-                            <InlineDialog
-                                content = { <div className = 'prejoin-preview-dropdown-btns'>
-                                    <div
-                                        className = 'prejoin-preview-dropdown-btn'
-                                        onClick = { joinConferenceWithoutAudio }>
-                                        <Icon
-                                            className = 'prejoin-preview-dropdown-icon'
-                                            size = { 24 }
-                                            src = { IconVolumeOff } />
-                                        { t('prejoin.joinWithoutAudio') }
-                                    </div>
-                                    {hasJoinByPhoneButton && <div
-                                        className = 'prejoin-preview-dropdown-btn'
-                                        onClick = { _showDialog }>
-                                        <Icon
-                                            className = 'prejoin-preview-dropdown-icon'
-                                            size = { 24 }
-                                            src = { IconPhone } />
-                                        { t('prejoin.joinAudioByPhone') }
-                                    </div>}
-                                </div> }
-                                isOpen = { showJoinByPhoneButtons }
-                                onClose = { _onDropdownClose }>
-                                <ActionButton
-                                    disabled = { !name }
-                                    hasOptions = { true }
-                                    onClick = { joinConference }
-                                    onOptionsClick = { _onOptionsClick }
-                                    type = 'primary'>
-                                    { t('prejoin.joinMeeting') }
-                                </ActionButton>
-                            </InlineDialog>
-                        </div>
-
-                        <div className = 'prejoin-preview-btn-container'>
-                            <AudioSettingsButton visible = { true } />
-                            <VideoSettingsButton visible = { true } />
-                        </div>
+                        {
+                            <div className='prejoin-preview-join-btn-container'>
+                                {
+                                    localParticipantCanJoin && <ActionButton
+                                        onClick={_joinConference}
+                                        type='primary'>
+                                        {this._getBtnText()}
+                                    </ActionButton>
+                                }
+                                {
+                                    !localParticipantCanJoin && participantType === 'StaffMember' &&
+                                    <ActionButton
+                                        onClick={_closeWindow}
+                                        type='close'>
+                                        Close
+                                    </ActionButton>
+                                }
+                            </div>
+                        }
                     </div>
-
-                    <div className = 'prejoin-checkbox-container'>
+                    <div className='prejoin-preview-btn-container'>
+                        <AudioSettingsButton visible={true}/>
+                        <VideoSettingsButton visible={true}/>
+                    </div>
+                    <div className='prejoin-checkbox-container'>
                         <input
-                            className = 'prejoin-checkbox'
-                            onChange = { _onCheckboxChange }
-                            type = 'checkbox' />
+                            className='prejoin-checkbox'
+                            onChange={_onCheckboxChange}
+                            type='checkbox'/>
                         <span>{t('prejoin.doNotShow')}</span>
                     </div>
                 </div>
-
                 { deviceStatusVisible && <DeviceStatus /> }
-                { showDialog && (
-                    <JoinByPhoneDialog
-                        joinConferenceWithoutAudio = { joinConferenceWithoutAudio }
-                        onClose = { _closeDialog } />
-                )}
             </div>
         );
     }
 }
 
-/**
- * Maps (parts of) the redux state to the React {@code Component} props.
- *
- * @param {Object} state - The redux state.
- * @returns {Object}
- */
 function mapStateToProps(state): Object {
+    const {jwt} = state['features/base/jwt'];
+    const jwtPayload = jwt && jwtDecode(jwt) || null;
+    const participant = jwtPayload && jwtPayload.context && jwtPayload.context.user || null;
+    const participantType = participant && participant.participant_type || null;
+
     return {
         isAnonymousUser: isGuest(state),
         deviceStatusVisible: isDeviceStatusVisible(state),
-        name: getDisplayName(state),
+        name: getPreJoinPageDisplayName(state),
         roomName: getRoomName(state),
         showDialog: isJoinByPhoneDialogVisible(state),
-        hasJoinByPhoneButton: isJoinByPhoneButtonVisible(state)
+        hasJoinByPhoneButton: isJoinByPhoneButtonVisible(state),
+        jwt, jwtPayload, participantType, participant
     };
 }
 

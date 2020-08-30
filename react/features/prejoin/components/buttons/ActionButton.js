@@ -6,7 +6,9 @@ import { Icon, IconArrowDown } from '../../../base/icons';
 const classNameByType = {
     primary: 'prejoin-btn--primary',
     secondary: 'prejoin-btn--secondary',
-    text: 'prejoin-btn--text'
+    available: 'prejoin-btn--available',
+    text: 'prejoin-btn--text',
+    close: 'prejoin-btn--close'
 };
 
 type Props = {
@@ -71,15 +73,6 @@ function ActionButton({ children, className, disabled, hasOptions, type, onClick
             className = { cls }
             onClick = { clickHandler }>
             {children}
-            {hasOptions && <div
-                className = 'prejoin-btn-options'
-                onClick = { optionsClickHandler }>
-                <Icon
-                    className = 'prejoin-btn-icon'
-                    size = { 14 }
-                    src = { IconArrowDown } />
-            </div>
-            }
         </div>
     );
 }

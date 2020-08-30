@@ -42,6 +42,16 @@ export function getDisplayName(state: Object): string {
     return state['features/base/settings'].displayName || '';
 }
 
+/**
+ * Returns the saved display name.
+ *
+ * @param {Object} state - The state of the application.
+ * @returns {string}
+ */
+export function getPreJoinPageDisplayName(state: Object): string {
+    return state['features/base/participants'][0].name || '';
+}
+
 
 /**
  * Handles changes to the `disableCallIntegration` setting.

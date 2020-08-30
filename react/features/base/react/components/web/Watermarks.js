@@ -7,6 +7,7 @@ import { connect } from '../../../redux';
 import { getParticipantCount } from '../../../participants';
 import { getRemoteTracks } from '../../../tracks';
 import WaitingMessage from './WaitingMessage';
+import jwtDecode from 'jwt-decode';
 
 declare var interfaceConfig: Object;
 
@@ -29,7 +30,8 @@ type Props = {
      */
     _isGuest: boolean,
     conferenceHasStarted: boolean,
-    isWelcomePage: boolean,
+    stopAnimation: boolean,
+    waitingMessageHeader: string,
 
     /**
      * Invoked to obtain translated strings.
@@ -139,14 +141,14 @@ class Watermarks extends Component<Props, State> {
      * @returns {ReactElement|null}
      */
     _renderWatermark() {
-        const { conferenceHasStarted, isWelcomePage } = this.props;
+        const { conferenceHasStarted, stopAnimation, waitingMessageHeader } = this.props;
 
 
         return (<div className = 'watermark '>
             <div
-                className = { `leftwatermark ${conferenceHasStarted || isWelcomePage ? '' : 'animate-flicker'}` } />
+                className = { `leftwatermark ${conferenceHasStarted || stopAnimation ? '' : 'animate-flicker'}` } />
             {
-                !isWelcomePage && <WaitingMessage />
+                !stopAnimation && <WaitingMessage waitingMessageHeader={waitingMessageHeader}/>
             }
         </div>);
     }

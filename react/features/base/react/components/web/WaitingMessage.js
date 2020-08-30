@@ -12,7 +12,7 @@ type Props = {
     _isGuest: boolean,
     jwt: Object,
     conferenceHasStarted: boolean,
-    isWelcomePage: boolean
+    stopAnimation: boolean
 };
 
 type State = {
@@ -96,13 +96,18 @@ class WaitingMessage extends Component<Props, State> {
     }
 
     _renderWaitingMessage() {
-        const { beforeAppointmentStart, appointmentStartAt } = this.state;
+        const {beforeAppointmentStart, appointmentStartAt} = this.state;
+        const {waitingMessageHeader} = this.props;
 
         let header = <p>Waiting for the other participant to join...</p>;
 
         if (beforeAppointmentStart && appointmentStartAt) {
             header = (<p>Your appointment will begin
                 at {getLocalizedDateFormatter(appointmentStartAt).format('hh:mm A')}</p>);
+        }
+
+        if (waitingMessageHeader) {
+           header =  <p>{waitingMessageHeader}</p>;
         }
 
         return (<div className = 'waitingMessage'>

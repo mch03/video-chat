@@ -1,30 +1,75 @@
 .prejoin {
     &-full-page {
+        font-family: "ProximaNovaLtReg"!important;
         background: #1C2025;
         position: absolute;
         width: 100%;
         height: 100%;
         z-index: $toolbarZ + 1;
+        .watermark{
+            position: absolute;
+        }
     }
 
-    &-input-area-container {
+    &-info-area-container {
         position: absolute;
         bottom: 48px;
         width: 100%;
         z-index: 2;
     }
 
-    &-input-area {
+    &-info-area {
         margin: 0 auto;
         text-align: center;
-        width: 320px;
+        width: 480px;
+        border: solid 1px #ccc;
+        border-radius: 2px;
+        background: #fff;
     }
 
-    &-title {
-        color: #fff;
-        font-size: 24px;
-        line-height: 32px;
-        margin-bottom: 16px;
+    &-info {
+        display: flex;
+        flex-direction: row;
+    }
+
+    &-info-logo-wrapper {
+        padding: 20px 10px;
+    }
+
+    &-info-logo {
+        background-image: url($defaultWatermarkLink);
+        background-position: center;
+        width: 90px;
+        height: 60px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        z-index: $zindex2;
+    }
+
+    &-info-text-wrapper {
+        display: flex;
+        flex-direction: column;
+        padding: 22px 20px 25px 0px;
+    }
+
+    &-info-title {
+        font-size: 18px;
+        text-align: left;
+        color: #aaa;
+    }
+
+    &-info-title-msg {
+        font-size: 14px;
+        text-align: left;
+        color: #aaa;
+    }
+
+    &-info-detail {
+        font-size: 14px;
+        text-align: left;
+        margin-top: 40px;
+        color: #aaa;
+        font-family: ProximaNovaLtBold!important;
     }
 
     &-btn {
@@ -32,21 +77,33 @@
         color: #fff;
         cursor: pointer;
         display: inline-block;
-        font-size: 15px;
-        line-height: 24px;
-        padding: 7px 16px;
+        font-size: 12px;
+        line-height: 22px;
+        padding: 5px 9px;
         position: relative;
         text-align: center;
-        width: 286px;
+        min-width: 100px;
 
         &--primary {
-            background: #0376DA;
-            border: 1px solid #0376DA;
+            margin-top: 16px;
+            background: #00c1ca;
+        }
+
+        &--available{
+            background: rgb(110, 176, 5);
+            border: 1px solid rgb(110, 176, 5);
         }
 
         &--secondary {
             background: #2A3A4B;
             border: 1px solid #5E6D7A;
+        }
+
+        &--close {
+            margin-top: 16px;
+            background: #fff;
+            color: #333;
+            border: solid 1px #ccc;
         }
 
         &--text {
@@ -134,6 +191,10 @@
     &--no-video {
         background: radial-gradient(50% 50% at 50% 50%, #5B6F80 0%, #365067 100%), #FFFFFF;
         text-align: center;
+    }
+
+    &-ready-btn {
+        margin-bottom: 10px;
     }
 
     &-video {
@@ -283,11 +344,9 @@
         }
     }
 
-    &-dropdown-container {
-        & > div > div:nth-child(2) > div > div {
-            background: #fff;
-            padding: 0;
-        }
+    &-join-btn-container {
+        min-height: 64px;
+        border-top: solid 1px #ccc;
     }
 
 }

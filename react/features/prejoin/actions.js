@@ -19,7 +19,8 @@ import {
     SET_PREJOIN_DEVICE_ERRORS,
     SET_PREJOIN_PAGE_VISIBILITY,
     SET_PREJOIN_VIDEO_DISABLED,
-    SET_PREJOIN_VIDEO_MUTED
+    SET_PREJOIN_VIDEO_MUTED,
+    CONNECT_JANE_SOCKET_SERVER
 } from './actionTypes';
 import { getDialOutStatusUrl, getDialOutUrl } from '../base/config/functions';
 import { createLocalTrack } from '../base/lib-jitsi-meet';
@@ -552,5 +553,16 @@ export function setPrejoinPageVisibility(value: boolean) {
 function startConference() {
     return {
         type: PREJOIN_START_CONFERENCE
+    };
+}
+
+/**
+ * Action used to mark the start of the conference.
+ *
+ * @returns {Object}
+ */
+function connectJaneSocketServer() {
+    return {
+        type: CONNECT_JANE_SOCKET_SERVER
     };
 }

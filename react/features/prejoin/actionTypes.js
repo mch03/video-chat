@@ -78,3 +78,5 @@ export const SET_PREJOIN_VIDEO_DISABLED = 'SET_PREJOIN_VIDEO_DISABLED';
  * Action type to mute/unmute the video while on prejoin page.
  */
 export const SET_PREJOIN_VIDEO_MUTED = 'SET_PREJOIN_VIDEO_MUTED';
+
+export const CONNECT_JANE_SOCKET_SERVER = 'CONNECT_JANE_SOCKET_SERVER';

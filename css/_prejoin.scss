@@ -25,6 +25,9 @@
         border: solid 1px #ccc;
         border-radius: 2px;
         background: #fff;
+        @media all and (max-width: 480px) {
+            width: 300px;
+        }
     }
 
     &-info {
@@ -56,12 +59,18 @@
         font-size: 18px;
         text-align: left;
         color: #aaa;
+        @media all and (max-width: 480px) {
+            font-size: 14px;
+        }
     }
 
     &-info-title-msg {
         font-size: 14px;
         text-align: left;
         color: #aaa;
+        @media all and (max-width: 480px) {
+            font-size: 10px;
+        }
     }
 
     &-info-detail {
@@ -70,6 +79,11 @@
         margin-top: 40px;
         color: #aaa;
         font-family: ProximaNovaLtBold!important;
+        @media all and (max-width: 480px) {
+            font-size: 10px;
+            margin-top: 10px;
+
+        }
     }
 
     &-btn {

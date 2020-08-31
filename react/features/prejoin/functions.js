@@ -2,6 +2,7 @@
 
 import {getRoomName} from '../base/conference';
 import {getDialOutStatusUrl, getDialOutUrl} from '../base/config/functions';
+import jwtDecode from 'jwt-decode';
 
 /**
  * Mutes or unmutes a track.
@@ -261,7 +262,11 @@ export function isJoinByPhoneDialogVisible(state: Object): boolean {
 export function isPrejoinPageEnabled(state: Object): boolean {
     // return state['features/base/config'].prejoinPageEnabled
     //     && !state['features/base/settings'].userSelectedSkipPrejoin;
-    return state['features/base/config'].prejoinPageEnabled || state['features/base/jwt'].jwt
+    const {jwt} = state['features/base/jwt'];
+    const jwtPayload = jwt && jwtDecode(jwt) || null;
+    const shouldEnablePreJoinPage = jwtPayload && jwtPayload.context && jwtPayload.context.ws_host && jwtPayload.context.ws_token;
+
+    return state['features/base/config'].prejoinPageEnabled || shouldEnablePreJoinPage
 }
 
 /**

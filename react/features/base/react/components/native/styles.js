@@ -208,7 +208,8 @@ const WATING_MESSAGE_STYLES = {
         position: 'absolute',
         top: 80,
         width: '100%',
-        flexDirection: 'row'
+        flexDirection: 'row',
+        backgroundColor: 'transparent'
     },
 
     waitingMessageImage: {

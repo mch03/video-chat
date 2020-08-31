@@ -129,19 +129,21 @@ class WaitingMessage extends Component<Props, State> {
                 at {getLocalizedDateFormatter(time).format('hh:mm A')}</Text>);
         }
 
-        return (<Animated.View className = 'waitingMessage' style={[styles.waitingMessageContainer,{
-            opacity: animate
-        }]}>
-            {
-                image
-            }
+        return (<View style={[styles.waitingMessageContainer]}>
+            <Animated.View className = 'waitingMessage' style={[styles.waitingMessageImage,{
+                opacity: animate
+            }]}>
+                {
+                    image
+                }
+            </Animated.View>
             <View style={{backgroundColor:'transparent'}}>
                 {
                     header
                 }
                 <Text style={styles.waitingMessageText}>Sit back, relax and take a moment for yourself.</Text>
             </View>
-        </Animated.View>);
+        </View>);
     }
 }
 

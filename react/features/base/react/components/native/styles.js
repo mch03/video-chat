@@ -211,6 +211,10 @@ const WATING_MESSAGE_STYLES = {
         flexDirection: 'row'
     },
 
+    waitingMessageImage: {
+        marginRight: 5,
+    },
+
     waitingMessageHeader: {
         fontSize: 15,
         marginTop: 5,
